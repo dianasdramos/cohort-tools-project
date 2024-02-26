@@ -20,7 +20,6 @@ const students = require("./students.json");
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
 
-
 // MIDDLEWARE
 // Research Team - Set up CORS middleware here:
 // ...
@@ -29,11 +28,12 @@ app.use(morgan("dev"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cors()); //define every route
+app.use(cors(origin= ['http://localhost:5005/api/cohorts', 'http://example.com'],
+['http://localhost:5005/docs'],
+['http://localhost:5005/api/cohorts'])); //define every route
 
 //sapp.use(logger("dev"));
 app.use(express.static('public'));
-
 
 // ROUTES - https://expressjs.com/en/starter/basic-routing.html
 // Devs Team - Start working on the routes here:
@@ -56,4 +56,3 @@ app.get("/api/students", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
