@@ -6,11 +6,14 @@ const cors = require("cors")
 
 const app = express();
 
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
 // STATIC DATA
 // Devs Team - Import the provided files with JSON data of students and cohorts here:
 // ...
 
-const cohorts = require("./cohorts.json")
+const cohorts = require("./cohorts.json");
 
 const students = require("./students.json");
 
