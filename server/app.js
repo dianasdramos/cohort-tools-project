@@ -12,10 +12,6 @@ const app = express();
 
 const cohorts = require("./cohorts.json")
 
-// const fs = require("fs");
-// let cohorts = fs.readFileSync("./cohorts.json");
-// cohorts = json.parse(cohorts);
-
 const students = require("./students.json");
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
