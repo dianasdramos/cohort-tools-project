@@ -5,17 +5,27 @@ const PORT = 5005;
 const cors = require("cors")
 
 const app = express();
+/* Configure Express Server to Handle JSON Files */
+app.use(express.json());
+
+/* Decode what can be sent via the web */
+app.use(express.urlencoded({extended:false}));
 
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+
+mongoose
+  .connect("mongodb://localhost:27017/cohort-tools-api")
+  .then(x => console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`))
+  .catch(err => console.error("Error connecting to mongo", err));
 
 // STATIC DATA
 // Devs Team - Import the provided files with JSON data of students and cohorts here:
 // ...
 
-const cohorts = require("./cohorts.json");
+const Cohort = require("./models/Cohort.model.js");
 
-const students = require("./students.json");
+const Student = require("./models/Students.model.js");
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
 
@@ -51,7 +61,7 @@ app.get("/docs", (req, res) => {
 //CREATE NEW COHORT
 
 app.post("/api/cohorts", (req, res) => {
-  cohorts.create({
+  Cohort.create({
     cohortSlug: req.body.cohortSlug,
     cohortName: req.body.cohortSlug,
     program: req.body.program,
@@ -77,16 +87,21 @@ app.post("/api/cohorts", (req, res) => {
 //RETRIEVE ALL COHORT DATA
 
 app.get("/api/cohorts", (req, res) => {
-  console.log(cohorts);
-  res.status(200).json(cohorts);
+  Cohort.find()
+  .then((allCohorts) => {
+    res.status(200).json(allCohorts);
+    })
+  .catch((error) => {
+    console.log(error);
+    res.status(500).json({error: "Failed to get all cohorts"});
+  });
 });
 
 //RETRIEVE A SPECIFIC COHORT BY ID
 
 app.get("/api/cohorts/:cohortId", (req, res) => {
 
-  cohorts.findById(req.params.cohortId)
-  .populate("cohorts")  
+  Cohort.findById(req.params.cohortId) 
   .then((cohortIdFind) => {
       res.status(200).json(cohortIdFind)
     })
@@ -99,7 +114,7 @@ app.get("/api/cohorts/:cohortId", (req, res) => {
 
 app.put("/api/cohorts/:cohortId", (req, res) => {
 
-  cohorts.findById(req.params.cohortId)
+  Cohort.findById(req.params.cohortId)
     .then((cohortIdUpdate) => {
       res.status(200).json(cohortIdUpdate)
     })
@@ -112,7 +127,7 @@ app.put("/api/cohorts/:cohortId", (req, res) => {
 
 app.delete("/api/cohorts/:cohortId", (req, res) => {
 
-  cohorts.findById(req.params.cohortId)
+  Cohort.findById(req.params.cohortId)
     .then((cohortIdDelete) => {
       res.status(200).json(cohortIdDelete)
     })
@@ -128,7 +143,7 @@ app.delete("/api/cohorts/:cohortId", (req, res) => {
 //CREATE NEW STUDENT
 
 app.post("/api/students", (req, res) => {
-  students.create({
+  Student.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
@@ -155,19 +170,26 @@ app.post("/api/students", (req, res) => {
 //RETRIEVE ALL STUDENT DATA
 
 app.get("/api/students", (req, res) => {
-  res.status(200).json(students);
+  Student.find()
+  .then((allStudents) => {
+    res.status(200).json(allStudents);
+    })
+  .catch((error) => {
+    res.status(500).json({error: "Failed to get all students"});
+  });
 });
 
 //RETRIEVE ALL STUDENTS FROM A SPECIFIC COHORT
 
 app.get("/api/students/cohort/:cohortId", (req, res) => {
 
-  students.findById(req.params.cohortId)
-  .populate("students")
+  Student.findById(req.params.cohortId)
+  .populate("cohort")
     .then((studentByCohortId) => {
       res.status(200).json(studentByCohortId)
     })
     .catch((error) => {
+      console.log(error);
       res.status(500).json({ error: "Failed to get students by cohort" })
     })
 })
@@ -176,11 +198,13 @@ app.get("/api/students/cohort/:cohortId", (req, res) => {
 
 app.get("/api/students/:studentId", (req, res) => {
 
-  students.findById(req.params.studentId)
+  Student.findById(req.params.studentId)
+  .populate("cohort")
     .then((studentIdFind) => {
       res.status(200).json(studentIdFind)
     })
     .catch((error) => {
+      console.log(error);
       res.status(500).json({ error: "Failed to get a student by ID" })
     })
 })
@@ -189,7 +213,7 @@ app.get("/api/students/:studentId", (req, res) => {
 
 app.put("/api/students/:studentId", (req, res) => {
 
-  students.findById(req.params.studentId)
+  Student.findById(req.params.studentId)
     .then((studentIdUpdate) => {
       res.status(200).json(studentIdUpdate)
     })
@@ -202,7 +226,7 @@ app.put("/api/students/:studentId", (req, res) => {
 
 app.delete("/api/students/:studentId", (req, res) => {
 
-  students.findById(req.params.studentId)
+  Student.findById(req.params.studentId)
     .then((studentIdDelete) => {
       res.status(200).json(studentIdDelete)
     })
