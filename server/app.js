@@ -114,7 +114,7 @@ app.get("/api/cohorts/:cohortId", (req, res) => {
 
 app.put("/api/cohorts/:cohortId", (req, res) => {
 
-  Cohort.findById(req.params.cohortId)
+  Cohort.findByIdAndUpdate(req.params.cohortId, req.body, {new: true})
     .then((cohortIdUpdate) => {
       res.status(200).json(cohortIdUpdate)
     })
@@ -127,7 +127,7 @@ app.put("/api/cohorts/:cohortId", (req, res) => {
 
 app.delete("/api/cohorts/:cohortId", (req, res) => {
 
-  Cohort.findById(req.params.cohortId)
+  Cohort.findByIdAndDelete(req.params.cohortId)
     .then((cohortIdDelete) => {
       res.status(200).json(cohortIdDelete)
     })
@@ -213,7 +213,7 @@ app.get("/api/students/:studentId", (req, res) => {
 
 app.put("/api/students/:studentId", (req, res) => {
 
-  Student.findById(req.params.studentId)
+  Student.findById(req.params.studentId, req.body, {new: true})
     .then((studentIdUpdate) => {
       res.status(200).json(studentIdUpdate)
     })
