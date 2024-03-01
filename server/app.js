@@ -3,7 +3,8 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const PORT = 5005;
 const cors = require("cors")
-const { errorHandler, notFoundHandler } = require("./middleware/error-handling");
+const { errorHandler, notFoundHandler, missingField } = require("./middleware/error-handling");
+
 
 const app = express();
 /* Configure Express Server to Handle JSON Files */
@@ -11,7 +12,7 @@ app.use(express.json());
 
 
 /* Decode what can be sent via the web */
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded({ extended: false }));
 
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
@@ -28,6 +29,8 @@ mongoose
 const Cohort = require("./models/Cohort.model.js");
 
 const Student = require("./models/Students.model.js");
+
+const User = require("./models/Users.model.js")
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
 
@@ -79,12 +82,12 @@ app.post("/api/cohorts", (req, res, next) => {
     leadTeacher: req.body.leadTeacher,
     totalHours: req.body.totalHours,
   })
-  
+
     .then((createdCohorts) => {
       console.log("Cohort created ->", createdCohorts);
       res.status(201).json(createdCohorts);
     })
-    
+
     .catch((error) => {
       next(err)
       // console.error("Error while creating the cohort ->", error);
@@ -96,20 +99,20 @@ app.post("/api/cohorts", (req, res, next) => {
 
 app.get("/api/cohorts", (req, res, next) => {
   Cohort.find()
-  .then((allCohorts) => {
-    res.status(200).json(allCohorts);
+    .then((allCohorts) => {
+      res.status(200).json(allCohorts);
     })
-  .catch((error) => {
-    next(error)
-  });
+    .catch((error) => {
+      next(error)
+    });
 });
 
 //RETRIEVE A SPECIFIC COHORT BY ID
 
 app.get("/api/cohorts/:cohortId", (req, res) => {
 
-  Cohort.findById(req.params.cohortId) 
-  .then((cohortIdFind) => {
+  Cohort.findById(req.params.cohortId)
+    .then((cohortIdFind) => {
       res.status(200).json(cohortIdFind)
     })
     .catch((error) => {
@@ -121,7 +124,7 @@ app.get("/api/cohorts/:cohortId", (req, res) => {
 
 app.put("/api/cohorts/:cohortId", (req, res) => {
 
-  Cohort.findByIdAndUpdate(req.params.cohortId, req.body, {new: true})
+  Cohort.findByIdAndUpdate(req.params.cohortId, req.body, { new: true })
     .then((cohortIdUpdate) => {
       res.status(200).json(cohortIdUpdate)
     })
@@ -177,12 +180,12 @@ app.post("/api/students", (req, res) => {
 
 app.get("/api/students", (req, res) => {
   Student.find()
-  .then((allStudents) => {
-    res.status(200).json(allStudents);
+    .then((allStudents) => {
+      res.status(200).json(allStudents);
     })
-  .catch((error) => {
-    next(error)
-  });
+    .catch((error) => {
+      next(error)
+    });
 });
 
 //RETRIEVE ALL STUDENTS FROM A SPECIFIC COHORT
@@ -190,7 +193,7 @@ app.get("/api/students", (req, res) => {
 app.get("/api/students/cohort/:cohortId", (req, res) => {
 
   Student.findById(req.params.cohortId)
-  .populate("cohort")
+    .populate("cohort")
     .then((studentByCohortId) => {
       res.status(200).json(studentByCohortId)
     })
@@ -204,7 +207,7 @@ app.get("/api/students/cohort/:cohortId", (req, res) => {
 app.get("/api/students/:studentId", (req, res) => {
 
   Student.findById(req.params.studentId)
-  .populate("cohort")
+    .populate("cohort")
     .then((studentIdFind) => {
       res.status(200).json(studentIdFind)
     })
@@ -217,7 +220,7 @@ app.get("/api/students/:studentId", (req, res) => {
 
 app.put("/api/students/:studentId", (req, res) => {
 
-  Student.findById(req.params.studentId, req.body, {new: true})
+  Student.findById(req.params.studentId, req.body, { new: true })
     .then((studentIdUpdate) => {
       res.status(200).json(studentIdUpdate)
     })
@@ -239,8 +242,12 @@ app.delete("/api/students/:studentId", (req, res) => {
     })
 })
 
+const authRouter = require("./routes/auth.routes");
+app.use("/auth", authRouter);
+
 app.use(errorHandler);
 app.use(notFoundHandler);
+app.use(missingField);
 
 // START SERVER
 app.listen(PORT, () => {

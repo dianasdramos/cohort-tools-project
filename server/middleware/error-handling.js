@@ -1,3 +1,7 @@
+
+
+
+
 function errorHandler(err, req, res, next) {
   // This middleware has 4 arguments. It will run whenever `next(err)` is called.
 
@@ -21,7 +25,33 @@ function notFoundHandler(req, res, next) {
     .json({ message: "This route does not exist" });
 };
 
+function missingField(req, res, next) {
+  // This middleware will run whenever the requested route is not found
+
+  if (req.email === "" || req.password === "" || req.name === "") {
+  
+     res
+       .status(400)
+       .json({message: "Provide email password and name." });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(req.email)) {
+    res
+      .status(400)
+      .json({ message: 'Provide a valid email address.' });
+  }
+
+  const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+  if (!passwordRegex.test(req.password))
+    res
+      .status(400)
+      .json({ message: 'Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.' });
+
+};
+
 module.exports = {
+  missingField,
   errorHandler,
   notFoundHandler
 }
