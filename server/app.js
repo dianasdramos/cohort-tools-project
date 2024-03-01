@@ -3,10 +3,12 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const PORT = 5005;
 const cors = require("cors")
+const { errorHandler, notFoundHandler } = require("./middleware/error-handling");
 
 const app = express();
 /* Configure Express Server to Handle JSON Files */
 app.use(express.json());
+
 
 /* Decode what can be sent via the web */
 app.use(express.urlencoded({extended:false}));
@@ -52,6 +54,8 @@ app.get("/docs", (req, res) => {
   res.sendFile(__dirname + "/views/docs.html");
 });
 
+
+
 //////////////////////////////////////////
 //---------- COHORT ROUTES ------------//
 ////////////////////////////////////////
@@ -60,7 +64,8 @@ app.get("/docs", (req, res) => {
 
 //CREATE NEW COHORT
 
-app.post("/api/cohorts", (req, res) => {
+app.post("/api/cohorts", (req, res, next) => {
+
   Cohort.create({
     cohortSlug: req.body.cohortSlug,
     cohortName: req.body.cohortSlug,
@@ -74,26 +79,28 @@ app.post("/api/cohorts", (req, res) => {
     leadTeacher: req.body.leadTeacher,
     totalHours: req.body.totalHours,
   })
+  
     .then((createdCohorts) => {
       console.log("Cohort created ->", createdCohorts);
       res.status(201).json(createdCohorts);
     })
+    
     .catch((error) => {
-      console.error("Error while creating the cohort ->", error);
-      res.status(500).json({ error: "Failed to create the cohort" });
+      next(err)
+      // console.error("Error while creating the cohort ->", error);
+      // res.status(500).json({ error: "Failed to create the cohort" });
     });
 });
 
 //RETRIEVE ALL COHORT DATA
 
-app.get("/api/cohorts", (req, res) => {
+app.get("/api/cohorts", (req, res, next) => {
   Cohort.find()
   .then((allCohorts) => {
     res.status(200).json(allCohorts);
     })
   .catch((error) => {
-    console.log(error);
-    res.status(500).json({error: "Failed to get all cohorts"});
+    next(error)
   });
 });
 
@@ -106,7 +113,7 @@ app.get("/api/cohorts/:cohortId", (req, res) => {
       res.status(200).json(cohortIdFind)
     })
     .catch((error) => {
-      res.status(500).json({ error: "Failed to get a cohort by ID" })
+      next(error)
     })
 })
 
@@ -119,7 +126,7 @@ app.put("/api/cohorts/:cohortId", (req, res) => {
       res.status(200).json(cohortIdUpdate)
     })
     .catch((error) => {
-      res.status(500).json({ error: "Failed to update a cohort by ID" })
+      next(error)
     })
 })
 
@@ -132,7 +139,7 @@ app.delete("/api/cohorts/:cohortId", (req, res) => {
       res.status(200).json(cohortIdDelete)
     })
     .catch((error) => {
-      res.status(500).json({ error: "Failed to delete a cohort by ID" })
+      next(error)
     })
 })
 
@@ -162,8 +169,7 @@ app.post("/api/students", (req, res) => {
       res.status(201).json(createdstudents);
     })
     .catch((error) => {
-      console.error("Error while adding the student ->", error);
-      res.status(500).json({ error: "Failed to add the student" });
+      next(error)
     });
 });
 
@@ -175,7 +181,7 @@ app.get("/api/students", (req, res) => {
     res.status(200).json(allStudents);
     })
   .catch((error) => {
-    res.status(500).json({error: "Failed to get all students"});
+    next(error)
   });
 });
 
@@ -189,8 +195,7 @@ app.get("/api/students/cohort/:cohortId", (req, res) => {
       res.status(200).json(studentByCohortId)
     })
     .catch((error) => {
-      console.log(error);
-      res.status(500).json({ error: "Failed to get students by cohort" })
+      next(error)
     })
 })
 
@@ -204,8 +209,7 @@ app.get("/api/students/:studentId", (req, res) => {
       res.status(200).json(studentIdFind)
     })
     .catch((error) => {
-      console.log(error);
-      res.status(500).json({ error: "Failed to get a student by ID" })
+      next(error)
     })
 })
 
@@ -218,7 +222,7 @@ app.put("/api/students/:studentId", (req, res) => {
       res.status(200).json(studentIdUpdate)
     })
     .catch((error) => {
-      res.status(500).json({ error: "Failed to update a student by ID" })
+      next(error)
     })
 })
 
@@ -231,9 +235,12 @@ app.delete("/api/students/:studentId", (req, res) => {
       res.status(200).json(studentIdDelete)
     })
     .catch((error) => {
-      res.status(500).json({ error: "Failed to delete a student by ID" })
+      next(error)
     })
 })
+
+app.use(errorHandler);
+app.use(notFoundHandler);
 
 // START SERVER
 app.listen(PORT, () => {
