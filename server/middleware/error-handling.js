@@ -1,7 +1,3 @@
-
-
-
-
 function errorHandler(err, req, res, next) {
   // This middleware has 4 arguments. It will run whenever `next(err)` is called.
 
@@ -47,7 +43,6 @@ function missingField(req, res, next) {
     res
       .status(400)
       .json({ message: 'Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.' });
-
 };
 
 module.exports = {

@@ -5,6 +5,7 @@ const PORT = 5005;
 const cors = require("cors")
 const { errorHandler, notFoundHandler, missingField } = require("./middleware/error-handling");
 
+require("dotenv").config()
 
 const app = express();
 /* Configure Express Server to Handle JSON Files */
