@@ -27,6 +27,8 @@ mongoose
 // Devs Team - Import the provided files with JSON data of students and cohorts here:
 // ...
 
+const {isAuthenticated} = require('./middleware/jwt.middleware.js')
+
 const Cohort = require("./models/Cohort.model.js");
 
 const Student = require("./models/Students.model.js");
@@ -243,7 +245,7 @@ app.delete("/api/students/:studentId", (req, res) => {
     })
 })
 
-app.post("/api/users/", (req, res) => {
+/* app.post("/api/users/", (req, res) => {
   User.create({
     email: req.body.email,
     password: req.body.password,
@@ -256,6 +258,17 @@ app.post("/api/users/", (req, res) => {
   .catch((error) => {
     next(error)
   });
+}) */
+
+app.get('/api/users/:id', isAuthenticated, (req, res, next)=>{
+  User.findById(req.params.id)
+  .then((foundUser) =>{
+    res.status(200).json(foundUser)
+    
+  })
+  .catch((error) => {
+    next(error)
+  })
 })
 
 const authRouter = require("./routes/auth.routes");
