@@ -243,6 +243,21 @@ app.delete("/api/students/:studentId", (req, res) => {
     })
 })
 
+app.post("/api/users/", (req, res) => {
+  User.create({
+    email: req.body.email,
+    password: req.body.password,
+    name: req.body.name
+  })
+  .then((createduser) => {
+    console.log("user created ->", createduser);
+    res.status(201).json(createduser);
+  })
+  .catch((error) => {
+    next(error)
+  });
+})
+
 const authRouter = require("./routes/auth.routes");
 app.use("/auth", authRouter);
 
